@@ -1,10 +1,6 @@
 # ESPN-NBA
 
-Functions to retrieve data from ESPN NBA.
-
-    This is a library aimed at getting data from ESPN,
-    regarding NBA matches. A variety of data is available,
-    as a number of available ways to acquire them is provided.
+This is a library aimed at getting data from ESPN, regarding NBA matches. A variety of data is available, as a number of available ways to acquire them is provided.
 
     A more detailed list follows below:
 
