@@ -12,15 +12,6 @@ import datetime
 from dateutil.parser import parse
 import pandas as pd
 
-__author__ = "Iordanou Giannis"
-__copyright__ = ""
-__credits__ = ""
-__license__ = "GPL"
-__version__ = "0.1"
-__maintainer__ = "Iordanou Giannis"
-__email__ = "iordanougiannis@hotmail.gr"
-__status__ = "Developing"
-
 # Functions
 
 # Read url Functions
