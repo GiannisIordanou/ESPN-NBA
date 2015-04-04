@@ -110,7 +110,6 @@ def read_url(url, read_with, retries=5):
                 html = readers[read_with](url)
             except Exception, e:
                 print "Read URL Error:", e
-                print url
                 html = None
                 errors += 1
             if html:
@@ -222,7 +221,6 @@ def scrape_links(espn_scoreboard):
         links = (a['href'] for a in div.findAll('a') if re.match('Play.*',
                  a.contents[0]))
         queries = [urlparse(link).query for link in links]
-        print 1
     else:
         queries = None
     return queries
@@ -300,15 +298,11 @@ def parse_score(game_id, league='nba'):  # TODO: Fix docstring
                      "Q1AP", "Q2AP", "Q3AP", "Q4AP", "QOT1AP", "QOT2AP", "QOT3AP", "QOT4AP", "QOT5AP", "QOT6AP",
                      "HP", "AP", "FTR", "TP", "Stadium", "City", "State", "Official_1", "Official_2", "Official_3",
                      "Attendance", "ToG", "Game_id"]
-    #print "Game_id:", game_id
 
-    #start = time.time()
     league = league.lower()
     espn_url = 'http://scores.espn.go.com/' + league + '/boxscore?' + game_id
     html = read_url(espn_url, "mechanize")
 
-    #stop = time.time() - start
-    #print "Read url in:", round(stop, 2), ".s"
     try:
         game_id = int(game_id.split("=")[1])
     except Exception, e:
@@ -325,23 +319,19 @@ def parse_score(game_id, league='nba'):  # TODO: Fix docstring
             status = status.split("/")[0].strip()
         except Exception, e:
             print "Status Error:", e
-            #print espn
             status, ot = ""
 
         try:
             series_status = re.findall("(.*?) \(", soup.find("div", {"class": "series-status"}).text)[0]
         except Exception, e:
             print "Series Status Error:", e
-            #print espn
             series_status = ""
 
         try:
             away_team, home_team = map(lambda x: x.strip(), re.findall(".*? -", soup.title.string.replace("\n", "").replace("\r", ""))[0].replace(" -", "").split("vs."))
         except Exception, e:
             print "Team Error:", e
-            #print espn
             away_team, home_team = "", ""
-            print soup.title.string
 
         if "Stars" in home_team:
             series_status = "All Stars"
@@ -354,7 +344,6 @@ def parse_score(game_id, league='nba'):  # TODO: Fix docstring
             season = dt.year + 1 if 9 <= dt.month <= 12 else dt.year
         except Exception, e:
             print "Match date Error:", e
-            #print espn
             match_date, location, match_time, season = "", "", "", ""
 
         try:
@@ -368,36 +357,28 @@ def parse_score(game_id, league='nba'):  # TODO: Fix docstring
                     stadium = location
                     city, state = "", ""
                 else:
-                    print "Stadium", location
-                    #print espn
                     stadium, city, state = "", "", ""
             else:
                 stadium, city, state = "", "", ""
         except Exception, e:
             print "Stadium date Error:", e
-            #print espn
             stadium, city, state = "", "", ""
-            #stadium, city, state = map(lambda x: x.strip(), location.split(",")) + [""]
+
 
         try:
             quarters = map(lambda x: x.text, soup.findAll("td", {"class":"period", "style":"text-align:center"}))
         except Exception, e:
             print "Quarters Error:", e
-            #print espn
             quarters = ""
 
         try:
             quarter_points = map(float, [i.text for i in soup.findAll("td",{"class": "", "colspan": "", "style":"text-align:center"})])
-            #quarter_points = [] Error when float
-        ##print espn
-        #print quarter_points
             if not quarters:
                 quarters = len(quarter_points) / 2
             home_quarters_points = quarter_points[-len(quarters):] + (10 - len(quarters)) * [""]
             away_quarters_points = quarter_points[:len(quarters)] + (10 - len(quarters)) * [""]
         except Exception, e:
             print "Quarters points Error:", e
-            #print espn
             home_quarters_points = ["", "", "", "", "", "", "", "", "", ""]
             away_quarters_points = ["", "", "", "", "", "", "", "", "", ""]
 
@@ -405,19 +386,17 @@ def parse_score(game_id, league='nba'):  # TODO: Fix docstring
             home_points, away_points = map(lambda x: float(x.text), soup.findAll("td", {"class":"ts", "style":"text-align:center"}))[::-1]
         except Exception, e:
             print "Team points Error:", e
-            #print espn
+
             try:
                 home_points, away_points = map(lambda x: float(x.span.text), soup.findAll("h3"))[::-1]
             except Exception, e:
-                print "Team points Error 2:", e
-                #print espn
+                print "Team points Error:", e
                 home_points, away_points = "", ""
 
         try:
             total_points = sum([home_points, away_points])
         except Exception, e:
             print "Total points Error:", e
-            #print espn
             total_points = ""
 
         try:
@@ -428,7 +407,6 @@ def parse_score(game_id, league='nba'):  # TODO: Fix docstring
                 ftr = ""
         except Exception, e:
             print "FTR Error:", e
-            #print espn
             ftr = ""
 
         try:
@@ -436,13 +414,12 @@ def parse_score(game_id, league='nba'):  # TODO: Fix docstring
             officials.extend((3 - len(officials)) * [""])
         except Exception, e:
             print "Officials Error:", e
-            #print espn
             officials = ["", "", ""]
+            
         try:
             attendance = float(re.findall("Attendance:</strong> (.*?)<br>", html)[0].replace(",", ""))
         except Exception, e:
             print "Attendance Error:", e
-            #print espn
             attendance = ""
 
         try:
@@ -450,21 +427,19 @@ def parse_score(game_id, league='nba'):  # TODO: Fix docstring
             time_of_game = hours * 60. + minutes
         except Exception, e:
             print "Time of game Error:", e
-            #print espn
             time_of_game = ""
+            
         match_score = [season, league.upper(), match_date, match_time, series_status, status, ot, home_team, away_team] + home_quarters_points + away_quarters_points + [home_points, away_points] + [ftr, total_points, stadium, city, state] + officials + [attendance, time_of_game, game_id]
 
         match_score = dict(zip(columns_names, match_score))
 
-        #stop1 = time.time() - start
-        #print "Scraping in:", round(stop1, 2), ".s"
         return match_score
     else:
         match_score = (len(columns_names) - 1) * [""]
         match_score = dict(zip(columns_names, match_score))
         match_score["Game_id"] = game_id
-        #match_score = [match_score]
-        return match_score  # TODO: Fix when can't read url
+
+        return match_score 
 
 
 def parse_box_score(game_id, league="nba"):
@@ -493,7 +468,6 @@ def parse_box_score(game_id, league="nba"):
             away_team, home_team = map(lambda x: x.strip(), re.findall(".*? -", soup.title.string.replace("\n", "").replace("\r", ""))[0].replace(" -", "").split("vs."))
         except Exception, e:
             print "Team Error:", e
-            ##print espn
             away_team, home_team = "", ""
 
         try:
@@ -504,10 +478,7 @@ def parse_box_score(game_id, league="nba"):
             season = dt.year + 1 if 9 <= dt.month <= 12 else dt.year
         except Exception, e:
             print "Match date Error:", e
-            ##print espn
             match_date, location, match_time, season = "", "", "", ""
-
-        #print ">> Game_id:", game_id, type(game_id)
 
         for index, row in enumerate(html_rows):
             if '<td style="text-align:left" nowrap><a href=' in row:
@@ -517,13 +488,10 @@ def parse_box_score(game_id, league="nba"):
                 player_stats_values = re.findall("<td>(.*?)</td>", "".join(row.split("/a>")[1:]).replace("td align=right>", "td>"))
                 player_stats = []
                 for player_stat in player_stats_values:
-                    #print player_stat,
                     if player_stat:
                         try:
                             player_stats.append(float(player_stat))
-                            #print "float"
                         except Exception, e:
-                            #print e
                             player_stats.append(player_stat)
                     else:
                         player_stats.append(player_stat)
@@ -552,9 +520,6 @@ def parse_box_score(game_id, league="nba"):
                 elif bench_ind[1] < player_index:
                     status = "Bench"
                     team = home_team
-                #else:
-                    #status, team = "", "200"
-                    #print starters_ind, player_index, bench_ind
 
                 player_dict["Status"] = status
                 player_dict["Team"] = team
@@ -584,7 +549,6 @@ def parse_box_score(game_id, league="nba"):
 def parse_play_by_play(game_id, league="nba"):
     #espn_link = "http://scores.espn.go.com/nba/playbyplay?gameId=" + str(game_id) + "&period=0"
     espn_link = "http://scores.espn.go.com/" + league + "/playbyplay?" + game_id + "&period=0"
-    print espn_link
     html = read_url(espn_link, "mechanize")
 
     try:
@@ -613,10 +577,7 @@ def parse_play_by_play(game_id, league="nba"):
             season = dt.year + 1 if 9 <= dt.month <= 12 else dt.year
         except Exception, e:
             print "Match date Error:", e
-            #print espn
             match_date, location, match_time, season = "", "", "", ""
-
-        print match_date, location, match_time, season
 
         play_by_play = []
         rows = re.findall('<tr class="(odd|even)">(.*?)</tr>', html)
@@ -703,7 +664,6 @@ def parse_totals(game_id, league="nba"):  # TODO: Fix docstring
             away_team, home_team = map(lambda x: x.strip(), re.findall(".*? -", soup.title.string.replace("\n", "").replace("\r", ""))[0].replace(" -", "").split("vs."))
         except Exception, e:
             print "Team Error:", e
-            ##print espn
             away_team, home_team = "", ""
         teams_totals_dict["HomeTeam"] = home_team
         teams_totals_dict["AwayTeam"] = away_team
@@ -716,7 +676,6 @@ def parse_totals(game_id, league="nba"):  # TODO: Fix docstring
             season = dt.year + 1 if 9 <= dt.month <= 12 else dt.year
         except Exception, e:
             print "Match date Error:", e
-            ##print espn
             match_date, location, match_time, season = "", "", "", ""
 
         teams_totals_dict["Season"] = season
