@@ -2,28 +2,28 @@
 
 This is a library aimed at getting data from ESPN, regarding NBA matches. A variety of data is available, as a number of available ways to acquire them is provided.
 
-A more detailed list follows below:
-
-Available data:
-    - quarter scores
-    - play by play
-    - box score
-    - team totals
-
-Available ways:
-    - single matches, requires game_id
-    - single days, requires datetime object
-    - range of days, requires dates as strings
-    - update previous saved data, requires csv file
-
-Misc:
-    - save to csv, xls, xlsx
-    - url handling with mechanize or requests
-
-Date format used "%d/%m/%Y".
-Can be changed in individual functions.
-
-Data structure is ideal for use with Pandas.
+    A more detailed list follows below:
+    
+    Available data:
+        - quarter scores
+        - play by play
+        - box score
+        - team totals
+    
+    Available ways:
+        - single matches, requires game_id
+        - single days, requires datetime object
+        - range of days, requires dates as strings
+        - update previous saved data, requires csv file
+    
+    Misc:
+        - save to csv, xls, xlsx
+        - url handling with mechanize or requests
+    
+    Date format used "%d/%m/%Y".
+    Can be changed in individual functions.
+    
+    Data structure is ideal for use with Pandas.
 
 >> Examples:
 
